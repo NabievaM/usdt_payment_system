@@ -16,7 +16,7 @@ export class Order extends Model<Order> {
   declare id: number;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.UUID, allowNull: false })
   user_id: number;
 
   @BelongsTo(() => User)

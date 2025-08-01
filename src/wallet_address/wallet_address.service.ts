@@ -4,9 +4,7 @@ import { WalletAddress } from './wallet_address.model';
 import { CreateWalletAddressDto } from './dto/create-wallet_address.dto';
 import { UpdateWalletAddressDto } from './dto/update-wallet_address.dto';
 import * as process from 'process';
-
-import TronWebDefault from 'tronweb';
-const TronWeb: any = TronWebDefault;
+import { TronWeb } from 'tronweb';
 
 @Injectable()
 export class WalletAddressService {
@@ -24,7 +22,7 @@ export class WalletAddressService {
   async create(dto: CreateWalletAddressDto) {
     const account = await this.tronWeb.createAccount();
     return this.walletModel.create({
-      address: account.address.base58 as string,
+      address: account.address.base58,
       user_id: dto.user_id,
     } as any);
   }
@@ -54,11 +52,12 @@ export class WalletAddressService {
     const usdtContract = await this.tronWeb
       .contract()
       .at('TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj');
+
     const balance = await usdtContract.methods.balanceOf(wallet.address).call();
 
     return {
       address: wallet.address,
-      balance: this.tronWeb.toDecimal(balance) / 1_000_000,
+      balance: Number(balance) / 1_000_000,
     };
   }
 }

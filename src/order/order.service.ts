@@ -5,7 +5,8 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { WalletAddress } from '../wallet_address/wallet_address.model';
 import { User } from '../user/user.model';
 import { v4 as uuidv4 } from 'uuid';
-import * as moment from 'moment';
+// import * as moment from 'moment';
+import moment from 'moment';
 
 @Injectable()
 export class OrderService {

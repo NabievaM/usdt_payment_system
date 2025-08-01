@@ -6,6 +6,7 @@ import { User } from './user/user.model';
 import { WalletAddressModule } from './wallet_address/wallet_address.module';
 import { WalletAddress } from './wallet_address/wallet_address.model';
 import { OrderModule } from './order/order.module';
+import { Order } from './order/order.model';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { OrderModule } from './order/order.module';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [User, WalletAddress],
+      models: [User, WalletAddress, Order],
       autoLoadModels: true,
       logging: false,
     }),
