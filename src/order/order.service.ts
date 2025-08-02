@@ -5,7 +5,6 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { WalletAddress } from '../wallet_address/wallet_address.model';
 import { User } from '../user/user.model';
 import { v4 as uuidv4 } from 'uuid';
-// import * as moment from 'moment';
 import moment from 'moment';
 
 @Injectable()
@@ -102,5 +101,34 @@ export class OrderService {
     }
 
     return order;
+  }
+
+  async updateStatusByWalletAddress(
+    address: string,
+    status: 'expired' | 'paid' | 'new',
+  ) {
+    const wallet = await this.walletAddressRepository.findOne({
+      where: { address },
+      include: [Order],
+    });
+
+    if (!wallet || !wallet.order) {
+      throw new NotFoundException('Заказ не найден для кошелька');
+    }
+
+    wallet.order.status = status;
+    wallet.order.paid_at = new Date();
+    await wallet.order.save();
+
+    return wallet.order;
+  }
+
+  async findByWalletAddress(address: string) {
+    const wallet = await this.walletAddressRepository.findOne({
+      where: { address },
+      include: [Order],
+    });
+
+    return wallet?.order;
   }
 }

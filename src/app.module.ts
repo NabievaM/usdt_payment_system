@@ -7,6 +7,10 @@ import { WalletAddressModule } from './wallet_address/wallet_address.module';
 import { WalletAddress } from './wallet_address/wallet_address.model';
 import { OrderModule } from './order/order.module';
 import { Order } from './order/order.model';
+import { TransactionModule } from './transaction/transaction.module';
+import { Transaction } from './transaction/transaction.model';
+import { WebhookModule } from './webhook/webhook.module';
+import { CronService } from './blockchain/cron/cron.service';
 
 @Module({
   imports: [
@@ -21,13 +25,16 @@ import { Order } from './order/order.model';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [User, WalletAddress, Order],
+      models: [User, WalletAddress, Order, Transaction],
       autoLoadModels: true,
       logging: false,
     }),
     UsersModule,
     WalletAddressModule,
     OrderModule,
+    TransactionModule,
+    WebhookModule,
   ],
+  providers: [CronService],
 })
 export class AppModule {}

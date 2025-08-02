@@ -19,7 +19,7 @@ export class WalletAddress extends Model<WalletAddress> {
   address: string;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: false })
   user_id: number;
 
   @BelongsTo(() => User)
