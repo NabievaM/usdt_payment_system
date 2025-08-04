@@ -9,7 +9,6 @@ import { OrderModule } from './order/order.module';
 import { Order } from './order/order.model';
 import { TransactionModule } from './transaction/transaction.module';
 import { Transaction } from './transaction/transaction.model';
-import { WebhookModule } from './webhook/webhook.module';
 import { CronService } from './blockchain/cron/cron.service';
 
 @Module({
@@ -33,7 +32,6 @@ import { CronService } from './blockchain/cron/cron.service';
     WalletAddressModule,
     OrderModule,
     TransactionModule,
-    WebhookModule,
   ],
   providers: [CronService],
 })

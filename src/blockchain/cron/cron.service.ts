@@ -8,13 +8,15 @@ import { OrderService } from '../../order/order.service';
 export class CronService {
   private readonly logger = new Logger(CronService.name);
 
+  // Храним последний timestamp для каждого адреса
+  private lastTimestamps = new Map<string, number>();
+
   constructor(
     private readonly walletService: WalletAddressService,
     private readonly transactionService: TransactionService,
     private readonly orderService: OrderService,
   ) {}
 
-  // Этот крон-задача будет выполняться каждые 20 секунд
   @Cron('*/20 * * * * *')
   async handleCron() {
     this.logger.debug('⏰ Крон-задача запущена');
@@ -23,19 +25,32 @@ export class CronService {
 
     for (const wallet of wallets) {
       try {
-        const { balance } = await this.walletService.checkBalance(wallet.id);
+        const since = this.lastTimestamps.get(wallet.address) || 0;
 
-        if (balance > 0) {
-          const existingTx = await this.transactionService.findByWallet(
-            wallet.address,
-          );
+        const recentTxs = await this.walletService.getRecentTransactions(
+          wallet.address,
+          since,
+        );
 
-          if (!existingTx) {
+        if (recentTxs.length) {
+          for (const tx of recentTxs) {
+            const txHash = tx.txID;
+
+            const exists = await this.transactionService.findByHash(txHash);
+            if (exists) continue;
+
+            const contractParam = tx.raw_data.contract[0].parameter.value;
+            const amount = Number(contractParam.amount) / 1_000_000;
+
+            const fromAddress = this.walletService
+              .getTronWeb()
+              .address.fromHex(contractParam.owner_address);
+
             await this.transactionService.create({
-              fromAddress: 'external',
+              fromAddress,
               toAddress: wallet.address,
-              amount: balance,
-              txHash: 'generated_or_fetched',
+              amount,
+              txHash,
               network: 'TRON',
               status: 'success',
               orderId: wallet.order_id,
@@ -46,14 +61,18 @@ export class CronService {
               'paid',
             );
 
-            this.logger.log(
-              `💸 Оплата получена для кошелька: ${wallet.address}`,
-            );
+            this.logger.log(`💸 Транзакция зафиксирована: ${txHash}`);
           }
+
+          // Обновляем последний timestamp
+          const latest = Math.max(
+            ...recentTxs.map((t: any) => t.raw_data.timestamp),
+          );
+          this.lastTimestamps.set(wallet.address, latest);
         }
       } catch (err) {
         this.logger.error(
-          `❌ Ошибка при проверке кошелька ${wallet.address}:`,
+          `❌ Ошибка при проверке транзакций ${wallet.address}:`,
           err.message,
         );
       }

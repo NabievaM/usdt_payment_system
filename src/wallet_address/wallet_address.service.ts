@@ -19,6 +19,10 @@ export class WalletAddressService {
     });
   }
 
+  getTronWeb() {
+    return this.tronWeb;
+  }
+
   async create(dto: CreateWalletAddressDto) {
     const account = await this.tronWeb.createAccount();
     return this.walletModel.create({
@@ -59,5 +63,14 @@ export class WalletAddressService {
       address: wallet.address,
       balance: Number(balance) / 1_000_000,
     };
+  }
+
+  async getRecentTransactions(address: string, since: number) {
+    const transactions = await this.tronWeb.trx.getTransactionsRelated(
+      address,
+      'to',
+    );
+
+    return transactions.filter((tx: any) => tx.raw_data.timestamp > since);
   }
 }
